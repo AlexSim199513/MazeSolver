@@ -4,7 +4,8 @@ class Window:
     def __init__(self, width, height):
         self.__root = Tk()
         self.__root.title("Your title here!")
-        self.__canvas = Canvas(self.__root)
+        self.__root.geometry(f"{width}x{height}")
+        self.__canvas = Canvas(self.__root, width=width, height=height)
         self.__canvas.pack(fill=BOTH, expand=True)
         self.__running = False
         self.__root.protocol("WM_DELETE_WINDOW", self.close)
