@@ -8,3 +8,23 @@ class Window:
         self.__canvas.pack()
         self.__running = False
         self.__root.protocol("WM_DELETE_WINDOW", self.close)
+
+    def redraw(self):
+        self.__root.update_idletasks()
+        self.__root.update()
+
+    def wait_for_close(self):
+        self.__running = True
+        while self.__running:
+            self.redraw()
+
+    def close(self):
+        self.__running = False
+
+def main():
+    win = Window(800, 600)
+    win.wait_for_close()
+
+# This ensures main() only runs if this file is run directly
+if __name__ == "__main__":
+    main() 
