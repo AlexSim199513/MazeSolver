@@ -45,6 +45,14 @@ def main():
     p2 = Point(800, 300)
     line1 =  Line(p1, p2)
     win.draw_line(line1, "black")
+    p3 = Point(400, 0)
+    p4 = Point(400, 600)
+    line2 = Line(p3, p4)
+    p5 = Point(0,0)
+    p6 = Point(800, 600)
+    line3 = Line(p5, p6)
+    win.draw_line(line3, "blue")
+    win.draw_line(line2, "red")
     win.wait_for_close()
 
 # This ensures main() only runs if this file is run directly
