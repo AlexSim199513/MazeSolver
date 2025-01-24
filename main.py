@@ -39,20 +39,42 @@ class Line:
     def draw(self, canvas, fill_color):
         canvas.create_line(self.point1.x, self.point1.y, self.point2.x, self.point2.y, fill=fill_color, width=2)
 
+class Cell:
+    def __init__(self, _x1, _x2, _y1, _y2, _win, left_wall = True, right_wall = True, top_wall = True, bottom_wall = True):
+        self._x1 = _x1
+        self._x2 = _x2
+        self._y1 = _y1
+        self._y2 = _y2
+        self._win = _win
+        self.left_wall = left_wall
+        self.right_wall = right_wall
+        self.top_wall = top_wall
+        self.bottom_wall = bottom_wall
+        self.top_left = Point(self._x1, self._y1)
+        self.top_right = Point(self._x2, self._y1)
+        self.bottom_left = Point(self._x1, self._y2)
+        self.bottom_right = Point(self._x2, self._y2)
+
+    def draw(self):
+        if self.top_wall:
+            top_line = Line(self.top_left, self.top_right)
+            self._win.draw_line(top_line, "black")
+        if self.bottom_wall:
+            bottom_line = Line(self.bottom_left, self.bottom_right)
+            self._win.draw_line(bottom_line, "black")
+        if self.left_wall:
+            left_line = Line(self.top_left, self.bottom_left)
+            self._win.draw_line(left_line, "black")
+        if self.right_wall:
+            right_line = Line(self.top_right, self.bottom_right)
+            self._win.draw_line(right_line, "black")
+
 def main():
     win = Window(800, 600)
-    p1 = Point(0, 300)
-    p2 = Point(800, 300)
-    line1 =  Line(p1, p2)
-    win.draw_line(line1, "black")
-    p3 = Point(400, 0)
-    p4 = Point(400, 600)
-    line2 = Line(p3, p4)
-    p5 = Point(0,0)
-    p6 = Point(800, 600)
-    line3 = Line(p5, p6)
-    win.draw_line(line3, "blue")
-    win.draw_line(line2, "red")
+    first_cell = Cell(200, 240, 200, 240, win, True, True, True, True)
+    first_cell.draw()
+    second_cell = Cell(400, 440, 400 , 440, win, False, False, True, True)
+    second_cell.draw()
     win.wait_for_close()
 
 # This ensures main() only runs if this file is run directly
