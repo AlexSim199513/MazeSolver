@@ -68,6 +68,15 @@ class Cell:
         if self.right_wall:
             right_line = Line(self.top_right, self.bottom_right)
             self._win.draw_line(right_line, "black")
+    
+    def draw_move(self, target_cell, undo=False):
+        self_center = Point((self._x1 + self._x2) / 2, (self._y1 + self._y2) /2)
+        target_center = Point((target_cell._x1 + target_cell._x2) / 2, (target_cell._y1 + target_cell._y2) /2)
+        new_line = Line(self_center, target_center)
+        if undo:
+            new_line.draw(self._win, "gray")
+        else:
+            new_line.draw(self._win, "red")
 
 def main():
     win = Window(800, 600)
