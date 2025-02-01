@@ -55,6 +55,7 @@ class Cell:
         self.bottom_left = Point(self._x1, self._y2)
         self.bottom_right = Point(self._x2, self._y2)
 
+    # Draws the individual Cells of the Maze
     def draw(self):
         if self.top_wall:
             top_line = Line(self.top_left, self.top_right)
@@ -68,7 +69,8 @@ class Cell:
         if self.right_wall:
             right_line = Line(self.top_right, self.bottom_right)
             self._win.draw_line(right_line, "black")
-    
+
+    # Draws the line between Cells during the solving
     def draw_move(self, target_cell, undo=False):
         self_center = Point((self._x1 + self._x2) / 2, (self._y1 + self._y2) /2)
         target_center = Point((target_cell._x1 + target_cell._x2) / 2, (target_cell._y1 + target_cell._y2) /2)
@@ -87,11 +89,10 @@ class Maze:
         self.cell_size_x = cell_size_x
         self.cell_size_y = cell_size_y
         self.win = win
-    
+        
+# initiates and fills the self._cells as well as drawing them to the board.
     def _create_cells(self):
-        self._cells = [
-            
-        ]
+        self._cells = []
         for i in range(self.num_cols):
             cell_col = []
             for j in range(self.num_rows):
@@ -106,6 +107,9 @@ class Maze:
         for i in range(self.num_cols):
             for j in range(self.num_rows):
                 self._draw_cell(i, j)
+
+    def _draw_cell(self):
+
 
 def main():
     win = Window(800, 600)
