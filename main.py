@@ -1,4 +1,4 @@
-from tkinter import Tk, BOTH, Canvas
+from tkinter import Tk, BOTH, Canvas, time
 
 class Window:
     def __init__(self, width, height):
@@ -89,7 +89,8 @@ class Maze:
         self.cell_size_x = cell_size_x
         self.cell_size_y = cell_size_y
         self.win = win
-        
+        self._create_cells()
+
 # initiates and fills the self._cells as well as drawing them to the board.
     def _create_cells(self):
         self._cells = []
@@ -108,8 +109,13 @@ class Maze:
             for j in range(self.num_rows):
                 self._draw_cell(i, j)
 
-    def _draw_cell(self):
+    def _draw_cell(self, i, j):
+        self._cells[i][j].draw()
+        self._animate()
 
+    def _animate(self):
+        self.win.redraw()
+        time.sleep(0.05)
 
 def main():
     win = Window(800, 600)
