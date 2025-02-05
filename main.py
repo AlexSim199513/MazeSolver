@@ -1,4 +1,5 @@
-from tkinter import Tk, BOTH, Canvas, time
+from tkinter import Tk, BOTH, Canvas
+import time
 
 class Window:
     def __init__(self, width, height):
@@ -57,18 +58,23 @@ class Cell:
 
     # Draws the individual Cells of the Maze
     def draw(self):
-        if self.top_wall:
+        if self._win is not None:
+            color = "black" if self.top_wall else "white"
             top_line = Line(self.top_left, self.top_right)
-            self._win.draw_line(top_line, "black")
-        if self.bottom_wall:
+            self._win.draw_line(top_line, color)
+
+            color = "black" if self.bottom_wall else "white"
             bottom_line = Line(self.bottom_left, self.bottom_right)
-            self._win.draw_line(bottom_line, "black")
-        if self.left_wall:
+            self._win.draw_line(bottom_line, color)
+
+            color = "black" if self.left_wall else "white"
             left_line = Line(self.top_left, self.bottom_left)
-            self._win.draw_line(left_line, "black")
-        if self.right_wall:
+            self._win.draw_line(left_line, color)
+
+            color = "black" if self.right_wall else "white"
             right_line = Line(self.top_right, self.bottom_right)
-            self._win.draw_line(right_line, "black")
+            self._win.draw_line(right_line, color)
+            
 
     # Draws the line between Cells during the solving
     def draw_move(self, target_cell, undo=False):
@@ -81,7 +87,7 @@ class Cell:
             new_line.draw(self._win, "red")
             
 class Maze:
-    def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, win,):
+    def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, win = None,):
         self.x1 = x1
         self.y1 = y1
         self.num_rows = num_rows
@@ -110,12 +116,24 @@ class Maze:
                 self._draw_cell(i, j)
 
     def _draw_cell(self, i, j):
-        self._cells[i][j].draw()
-        self._animate()
+        if self.win is not None:
+            self._cells[i][j].draw()
+            self._animate()
 
     def _animate(self):
         self.win.redraw()
         time.sleep(0.05)
+
+    #always ensures there is an entry and exit it the top left and bottom right cells respectively
+    def _break_entrance_and_exit(self):
+        self._cells[0][0].top_wall = False
+        #Redraws the entry cell after changing the top wall to an entrance
+        self._draw_cell(self._cells[0][0])
+
+        self._cells[self.num_cols - 1][self.num_rows - 1].bottom_wall = False
+        #Redraws the exit cell after changing the bottom wall to an exit
+        self._draw_cell(self._cells[self.num_cols - 1][self.num_rows - 1])
+
 
 def main():
     win = Window(800, 600)
