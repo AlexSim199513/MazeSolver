@@ -114,12 +114,14 @@ class Maze:
         for i in range(self.num_cols):
             for j in range(self.num_rows):
                 self._draw_cell(i, j)
-
+                
+    # Loops through the cells array and calls the draw method on each one individually
     def _draw_cell(self, i, j):
         if self.win is not None:
             self._cells[i][j].draw()
             self._animate()
 
+    #Pauses the _draw_cell method to make it easier to follow to maze drawing process
     def _animate(self):
         self.win.redraw()
         time.sleep(0.05)
