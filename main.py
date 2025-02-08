@@ -1,6 +1,7 @@
 from tkinter import Tk, BOTH, Canvas
 import time
 
+# Class creating the window that the maze is drawn to
 class Window:
     def __init__(self, width, height):
         self.__root = Tk()
@@ -26,12 +27,13 @@ class Window:
     def draw_line(self, line, fill_color):
         line.draw(self.__canvas, fill_color)
 
-
+# Class for (x, y) coordinates to create lines, cells , etc
 class Point:
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
+# Class for the individual lines drawn while solving maze or the walls of individual cells
 class Line:
     def __init__(self, point1, point2):
         self.point1 = point1
@@ -40,6 +42,7 @@ class Line:
     def draw(self, canvas, fill_color):
         canvas.create_line(self.point1.x, self.point1.y, self.point2.x, self.point2.y, fill=fill_color, width=2)
 
+# Class for the individual squares creating the maze
 class Cell:
     def __init__(self, _x1, _x2, _y1, _y2, _win, left_wall = True, right_wall = True, top_wall = True, bottom_wall = True):
         self._x1 = _x1
