@@ -1,5 +1,5 @@
 from tkinter import Tk, BOTH, Canvas
-import time
+import time, random
 
 # Class creating the window that the maze is drawn to
 class Window:
@@ -44,7 +44,7 @@ class Line:
 
 # Class for the individual squares creating the maze
 class Cell:
-    def __init__(self, _x1, _x2, _y1, _y2, _win, left_wall = True, right_wall = True, top_wall = True, bottom_wall = True):
+    def __init__(self, _x1, _x2, _y1, _y2, _win, left_wall = True, right_wall = True, top_wall = True, bottom_wall = True, visited = False):
         self._x1 = _x1
         self._x2 = _x2
         self._y1 = _y1
@@ -58,6 +58,7 @@ class Cell:
         self.top_right = Point(self._x2, self._y1)
         self.bottom_left = Point(self._x1, self._y2)
         self.bottom_right = Point(self._x2, self._y2)
+        self.visited = visited
 
     # Draws the individual Cells of the Maze
     def draw(self):
@@ -90,7 +91,7 @@ class Cell:
             new_line.draw(self._win, "red")
             
 class Maze:
-    def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, win = None,):
+    def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, win = None, seed = None):
         self.x1 = x1
         self.y1 = y1
         self.num_rows = num_rows
@@ -99,6 +100,10 @@ class Maze:
         self.cell_size_y = cell_size_y
         self.win = win
         self._create_cells()
+
+        if seed is not None:
+            self.seed = seed
+            random.seed(seed)
 
 # initiates and fills the self._cells as well as drawing them to the board.
     def _create_cells(self):
@@ -138,6 +143,64 @@ class Maze:
         self._cells[self.num_cols - 1][self.num_rows - 1].bottom_wall = False
         #Redraws the exit cell after changing the bottom wall to an exit
         self._draw_cell(self._cells[self.num_cols - 1][self.num_rows - 1])
+
+    def _break_Walls_r(self, i, j):
+        
+        self._cells[i][j].visited = True
+        self._cells[i][j].draw()
+
+        while True:
+            directions = []
+
+            # Check the Cell above
+            if i - 1 >= 0:
+                if not self._cells[i -1][j].visited:
+                    directions.append((i - 1, j))
+
+            # Check the Cell Below
+            if (i +1) < len(self._cells):
+                if not self._cells[i + 1][j].visited:
+                    directions.append((i + 1, j))
+
+            #Checks to the left
+            if j - 1 >= 0:
+                if not self._cells[i][j -1].visited:
+                    directions.append((i, j - 1))
+
+            # Checks to the right
+            if j + 1 < len(self._cells[0]):
+                if not self._cells[i][j + 1].visited:
+                    directions.append((i, j + 1))
+
+            # Breaks the recursion if no route is found
+            if len(directions) == 0:
+                self._cells[i][j].draw()
+                return
+
+            next_i, next_j = random.choice(directions)
+
+            # Checks if the next cell is above 
+            if next_i < i:
+                self._cells[i][j].top_wall = False
+                self._cells[next_i][j].bottom_wall = False
+
+            # Checks if the next cell is below
+            if next_i > i:
+                self._cells[i][j].bottom_wall = False
+                self._cells[next_i][j].top_wall = False
+
+            # Checks if next cell is to the left
+            if next_j < j:
+                self._cells[i][j].left_wall = False
+                self._cells[next_i][next_j].right_wall = False
+
+            # Checks if next cell is to the right
+            if next_j > j:
+                self._cells[i][j].right_wall = False
+                self._cells[next_i][next_j].left_wall = False
+
+            # Recursively calls the next layer of the function
+            self._break_Walls_r(next_i, next_j)
 
 
 def main():
