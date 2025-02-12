@@ -5,7 +5,7 @@ import time, random
 class Window:
     def __init__(self, width, height):
         self.__root = Tk()
-        self.__root.title("Your title here!")
+        self.__root.title("My Maze Solver")
         self.__root.geometry(f"{width}x{height}")
         self.__canvas = Canvas(self.__root, width=width, height=height)
         self.__canvas.pack(fill=BOTH, expand=True)
@@ -44,7 +44,7 @@ class Line:
 
 # Class for the individual squares creating the maze
 class Cell:
-    def __init__(self, _x1, _x2, _y1, _y2, _win, left_wall = True, right_wall = True, top_wall = True, bottom_wall = True, visited = False):
+    def __init__(self, _x1, _x2, _y1, _y2, _win, left_wall = True, right_wall = True, top_wall = True, bottom_wall = True, visited = False, end = False):
         self._x1 = _x1
         self._x2 = _x2
         self._y1 = _y1
@@ -59,6 +59,7 @@ class Cell:
         self.bottom_left = Point(self._x1, self._y2)
         self.bottom_right = Point(self._x2, self._y2)
         self.visited = visited
+        self.end = end
 
     # Draws the individual Cells of the Maze
     def draw(self):
@@ -85,11 +86,9 @@ class Cell:
         self_center = Point((self._x1 + self._x2) / 2, (self._y1 + self._y2) /2)
         target_center = Point((target_cell._x1 + target_cell._x2) / 2, (target_cell._y1 + target_cell._y2) /2)
         new_line = Line(self_center, target_center)
-        if undo:
-            new_line.draw(self._win, "gray")
-        else:
-            new_line.draw(self._win, "red")
-            
+        color = "gray" if undo else "red"
+        self._win.draw_line(new_line, color)
+                
 class Maze:
     def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, win = None, seed = None):
         self.x1 = x1
@@ -100,6 +99,9 @@ class Maze:
         self.cell_size_y = cell_size_y
         self.win = win
         self._create_cells()
+        self._break_entrance_and_exit()
+        self._break_walls_r(0, 0)
+        self._reset_cells_visited()
 
         if seed is not None:
             self.seed = seed
@@ -108,19 +110,20 @@ class Maze:
 # initiates and fills the self._cells as well as drawing them to the board.
     def _create_cells(self):
         self._cells = []
-        for i in range(self.num_cols):
-            cell_col = []
-            for j in range(self.num_rows):
-                new_x1 = (self.cell_size_x * i) + self.x1
-                new_x2 = (self.cell_size_x * (i + 1)) + self.x1
-                new_y1 = (self.cell_size_y * j) + self.y1
-                new_y2 = (self.cell_size_y * (j + 1)) + self.y1
+        for i in range(self.num_rows):      # Create rows first
+            cell_row = []                    # Create a new row
+            for j in range(self.num_cols):   # Fill the row with columns
+                new_x1 = (self.cell_size_x * j) + self.x1
+                new_x2 = (self.cell_size_x * (j + 1)) + self.x1
+                new_y1 = (self.cell_size_y * i) + self.y1
+                new_y2 = (self.cell_size_y * (i + 1)) + self.y1
                 new_cell = Cell(new_x1, new_x2, new_y1, new_y2, self.win)
-                cell_col.append(new_cell)
-            self._cells.append(cell_col)
+                cell_row.append(new_cell)    # Add cell to row
+            self._cells.append(cell_row)     # Add row to cells
 
-        for i in range(self.num_cols):
-            for j in range(self.num_rows):
+        # Draw all cells
+        for i in range(self.num_rows):
+            for j in range(self.num_cols):
                 self._draw_cell(i, j)
                 
     # Loops through the cells array and calls the draw method on each one individually
@@ -138,13 +141,21 @@ class Maze:
     def _break_entrance_and_exit(self):
         self._cells[0][0].top_wall = False
         #Redraws the entry cell after changing the top wall to an entrance
-        self._draw_cell(self._cells[0][0])
+        self._draw_cell(0, 0)
 
-        self._cells[self.num_cols - 1][self.num_rows - 1].bottom_wall = False
+        self._cells[self.num_rows - 1][self.num_cols - 1].bottom_wall = False
+        self._cells[self.num_rows - 1][self.num_cols - 1].end = True
         #Redraws the exit cell after changing the bottom wall to an exit
-        self._draw_cell(self._cells[self.num_cols - 1][self.num_rows - 1])
+        self._draw_cell(self.num_rows - 1, self.num_cols - 1)
 
-    def _break_Walls_r(self, i, j):
+    # Resets the visited property of every cell in the maze to allow the maze to be solved.
+    def _reset_cells_visited(self):
+        for i in range (self.num_rows):
+            for j in range (self.num_cols):
+                self._cells[i][j].visited = False
+
+    # Recursively breaks walls in random directions to create the maze path
+    def _break_walls_r(self, i, j):
         
         self._cells[i][j].visited = True
         self._cells[i][j].draw()
@@ -200,15 +211,71 @@ class Maze:
                 self._cells[next_i][next_j].left_wall = False
 
             # Recursively calls the next layer of the function
-            self._break_Walls_r(next_i, next_j)
+            self._break_walls_r(next_i, next_j)
+        
+    def solve(self):
+        return self._solve_r(0, 0)
 
+    def _solve_r(self, i, j):
+        self._animate()
+        self._cells[i][j].visited = True
 
+        # Checks if current cell is the exit cell
+        if self._cells[i][j].end == True:
+            return True
+        
+        # Checks the Cell to the right
+        if self._cells[i][j].right_wall == False:
+            if j + 1 < self.num_cols:
+                if self._cells[i][j + 1].visited == False:
+                    self._cells[i][j].draw_move(self._cells[i][j + 1])
+                    if self._solve_r(i, j + 1):
+                        return True
+                    self._cells[i][j].draw_move(self._cells[i][j+1], True)
+
+        # Checks the cell below 
+        if self._cells[i][j].bottom_wall == False:
+            if i + 1 < self.num_rows:
+                if self._cells[i+1][j].visited == False:
+                    self._cells[i][j].draw_move(self._cells[i+1][j])
+                    if self._solve_r(i+1, j):
+                        return True
+                    self._cells[i][j].draw_move(self._cells[i+1][j], True)
+
+        # Checks cell to the left
+        if self._cells[i][j].left_wall == False:
+            if j - 1 >= 0:
+                if self._cells[i][j-1].visited == False:
+                    self._cells[i][j].draw_move(self._cells[i][j-1])
+                    if self._solve_r(i, j-1):
+                        return True
+                    self._cells[i][j].draw_move(self._cells[i][j-1], True)
+
+        # Checks the cell above
+        if self._cells[i][j].top_wall == False:
+            if i - 1 >= 0:
+                if self._cells[i-1][j].visited == False:
+                    self._cells[i][j].draw_move(self._cells[i-1][j])
+                    if self._solve_r(i-1, j):
+                        return True
+                    self._cells[i][j].draw_move(self._cells[i-1][j], True)
+        
+        return False # returns false if no valid direction is found to the end goal
+    
 def main():
-    win = Window(800, 600)
-    first_cell = Cell(200, 240, 200, 240, win, True, True, True, True)
-    first_cell.draw()
-    second_cell = Cell(400, 440, 400 , 440, win, False, False, True, True)
-    second_cell.draw()
+    # Create window
+    window_width = 800
+    window_height = 600
+    win = Window(window_width, window_height)
+    
+    # Calculate good maze dimensions
+    cell_size_x = 40  # each cell will be 40px wide
+    cell_size_y = 40  # and 40px high
+
+    maze = Maze(x1=50, y1=50, num_rows=12, num_cols=15, cell_size_x=cell_size_x, cell_size_y=cell_size_y, win=win)
+
+    maze.solve()
+
     win.wait_for_close()
 
 # This ensures main() only runs if this file is run directly
