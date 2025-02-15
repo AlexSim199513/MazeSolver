@@ -157,6 +157,7 @@ class Maze:
     # Recursively breaks walls in random directions to create the maze path
     def _break_walls_r(self, i, j):
         
+        self._animate()
         self._cells[i][j].visited = True
         self._cells[i][j].draw()
 
